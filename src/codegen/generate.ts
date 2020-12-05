@@ -177,24 +177,9 @@ export function supportDeepObjects(params: OpenAPIV3.ParameterObject[]) {
  * Main entry point that generates TypeScript code from a given API spec.
  */
 export default class ApiGenerator {
-  constructor(
-    public readonly spec: OpenAPIV3.Document,
-    public readonly opts: Opts = {}
-  ) {}
+  constructor(private spec: OpenAPIV3.Document, private opts: Opts = {}) {}
 
-  aliases: ts.TypeAliasDeclaration[] = [];
-
-  // Collect the types of all referenced schemas so we can export them later
-  refs: Record<string, ts.TypeReferenceNode> = {};
-
-  // Keep track of already used type aliases
-  typeAliases: Record<string, number> = {};
-
-  reset() {
-    this.aliases = [];
-    this.refs = {};
-    this.typeAliases = {};
-  }
+  private aliases: ts.TypeAliasDeclaration[] = [];
 
   resolve<T>(obj: T | OpenAPIV3.ReferenceObject) {
     if (!isReference(obj)) return obj;
@@ -223,6 +208,12 @@ export default class ApiGenerator {
     return false;
   }
 
+  // Collect the types of all referenced schemas so we can export them later
+  private refs: Record<string, ts.TypeReferenceNode> = {};
+
+  // Keep track of already used type aliases
+  private typeAliases: Record<string, number> = {};
+
   getUniqueAlias(name: string) {
     let used = this.typeAliases[name] || 0;
     if (used) {
@@ -246,10 +237,10 @@ export default class ApiGenerator {
     if (!ref) {
       const schema = this.resolve<OpenAPIV3.SchemaObject>(obj);
       const name = this.getUniqueAlias(
-        _.upperFirst(_.camelCase(schema.title || this.getRefBasename($ref)))
+        _.upperFirst(schema.title || this.getRefBasename($ref))
       );
 
-      ref = this.refs[$ref] = factory.createTypeReferenceNode(name, undefined);
+      ref = this.refs[$ref] = ts.createTypeReferenceNode(name, undefined);
 
       const type = this.getTypeFromSchema(schema);
       this.aliases.push(
@@ -323,7 +314,7 @@ export default class ApiGenerator {
       );
     } else {
       // oneOf -> untagged union
-      return factory.createUnionTypeNode(variants.map(this.getTypeFromSchema));
+      return ts.createUnionTypeNode(variants.map(this.getTypeFromSchema));
     }
   }
 
@@ -359,19 +350,19 @@ export default class ApiGenerator {
     }
     if (schema.anyOf) {
       // anyOf -> union
-      return factory.createUnionTypeNode(
+      return ts.createUnionTypeNode(
         schema.anyOf.map(this.getTypeFromSchema.bind(this))
       );
     }
     if (schema.allOf) {
       // allOf -> intersection
-      return factory.createIntersectionTypeNode(
+      return ts.createIntersectionTypeNode(
         schema.allOf.map(this.getTypeFromSchema.bind(this))
       );
     }
     if ("items" in schema) {
       // items -> array
-      return factory.createArrayTypeNode(this.getTypeFromSchema(schema.items));
+      return ts.createArrayTypeNode(this.getTypeFromSchema(schema.items));
     }
     if (schema.properties || schema.additionalProperties) {
       // properties -> literal type
@@ -386,14 +377,8 @@ export default class ApiGenerator {
       const types = schema.enum.map((s) => {
         if (s === null) return cg.keywordType.null;
         if (typeof s === "boolean")
-          return s
-            ? factory.createLiteralTypeNode(
-                ts.factory.createToken(ts.SyntaxKind.TrueKeyword)
-              )
-            : factory.createLiteralTypeNode(
-                ts.factory.createToken(ts.SyntaxKind.FalseKeyword)
-              );
-        return factory.createLiteralTypeNode(factory.createStringLiteral(s));
+          return s ? ts.createTrue() : ts.createFalse();
+        return ts.createLiteralTypeNode(ts.createStringLiteral(s));
       });
       return types.length > 1 ? factory.createUnionTypeNode(types) : types[0];
     }
@@ -443,7 +428,7 @@ export default class ApiGenerator {
   }
 
   getTypeFromResponses(responses: OpenAPIV3.ResponsesObject) {
-    return factory.createUnionTypeNode(
+    return ts.createUnionTypeNode(
       Object.entries(responses).map(([code, res]) => {
         const statusType =
           code === "default"
@@ -479,28 +464,11 @@ export default class ApiGenerator {
     return this.getTypeFromSchema(this.getSchemaFromContent(res.content));
   }
 
-  getResponseType(
-    responses?: OpenAPIV3.ResponsesObject
-  ): "json" | "text" | "blob" {
-    // backwards-compatibility
-    if (!responses) return "text";
-
-    const resolvedResponses = Object.values(responses).map(
-      this.resolve.bind(this)
-    );
-
-    // if no content is specified, assume `text` (backwards-compatibility)
-    if (
-      !resolvedResponses.some(
-        (res) => Object.keys(res.content ?? []).length > 0
-      )
-    ) {
-      return "text";
-    }
-
-    // if there’s `application/json` or `*/*`, assume `json`
-    if (
-      resolvedResponses.some(
+  hasJsonContent(responses?: OpenAPIV3.ResponsesObject) {
+    if (!responses) return false;
+    return Object.values(responses)
+      .map(this.resolve.bind(this))
+      .some(
         (res) =>
           !!_.get(res, ["content", "application/json"]) ||
           !!_.get(res, ["content", "*/*"])
@@ -541,17 +509,11 @@ export default class ApiGenerator {
       return { type: "string" };
     }
 
-    // rest (e.g. `application/octet-stream`, `application/gzip`, …) -> binary
-    return { type: "string", format: "binary" };
-  }
-
   wrapResult(ex: ts.Expression) {
     return this.opts?.optimistic ? callOazapftsFunction("ok", [ex]) : ex;
   }
 
   generateApi() {
-    this.reset();
-
     // Parse ApiStub.ts so that we don't have to generate everything manually
     const stub = cg.parseFile(
       path.resolve(__dirname, "../../src/codegen/ApiStub.ts")
@@ -559,10 +521,7 @@ export default class ApiGenerator {
 
     // ApiStub contains `const servers = {}`, find it ...
     const servers = cg.findFirstVariableDeclaration(stub.statements, "servers");
-    // servers.initializer is readonly, this might break in a future TS version, but works fine for now.
-    Object.assign(servers, {
-      initializer: generateServers(this.spec.servers || []),
-    });
+    servers.initializer = generateServers(this.spec.servers || []);
 
     const { initializer } = cg.findFirstVariableDeclaration(
       stub.statements,
@@ -672,8 +631,8 @@ export default class ApiGenerator {
                   .map(({ name }) => ({ name: argNames[name] }))
               ),
               {
-                initializer: factory.createObjectLiteralExpression(),
-                type: factory.createTypeLiteralNode(
+                initializer: ts.createObjectLiteral(),
+                type: ts.createTypeLiteralNode(
                   optional.map((p) =>
                     cg.createPropertySignature({
                       name: argNames[this.resolve(p).name],
@@ -691,17 +650,14 @@ export default class ApiGenerator {
 
         methodParams.push(
           cg.createParameter("opts", {
-            type: factory.createTypeReferenceNode(
-              "Oazapfts.RequestOpts",
-              undefined
-            ),
+            type: ts.createTypeReferenceNode("Oazapfts.RequestOpts", undefined),
             questionToken: true,
           })
         );
 
         // Next, build the method body...
 
-        const returnType = this.getResponseType(responses);
+        const returnsJson = this.hasJsonContent(responses);
         const query = parameters.filter((p) => p.in === "query");
         const header = parameters
           .filter((p) => p.in === "header")
@@ -724,38 +680,35 @@ export default class ApiGenerator {
 
         const url = createUrlExpression(path, qs);
         const init: ts.ObjectLiteralElementLike[] = [
-          factory.createSpreadAssignment(factory.createIdentifier("opts")),
+          ts.createSpreadAssignment(ts.createIdentifier("opts")),
         ];
 
         if (method !== "GET") {
           init.push(
-            factory.createPropertyAssignment(
+            ts.createPropertyAssignment(
               "method",
-              factory.createStringLiteral(method)
+              ts.createStringLiteral(method)
             )
           );
         }
 
         if (bodyVar) {
           init.push(
-            cg.createPropertyAssignment(
-              "body",
-              factory.createIdentifier(bodyVar)
-            )
+            cg.createPropertyAssignment("body", ts.createIdentifier(bodyVar))
           );
         }
 
         if (header.length) {
           init.push(
-            factory.createPropertyAssignment(
+            ts.createPropertyAssignment(
               "headers",
-              factory.createObjectLiteralExpression(
+              ts.createObjectLiteral(
                 [
-                  factory.createSpreadAssignment(
-                    factory.createLogicalAnd(
-                      factory.createIdentifier("opts"),
-                      factory.createPropertyAccessExpression(
-                        factory.createIdentifier("opts"),
+                  ts.createSpreadAssignment(
+                    ts.createLogicalAnd(
+                      ts.createIdentifier("opts"),
+                      ts.createPropertyAccess(
+                        ts.createIdentifier("opts"),
                         "headers"
                       )
                     )
@@ -763,7 +716,7 @@ export default class ApiGenerator {
                   ...header.map((name) =>
                     cg.createPropertyAssignment(
                       name,
-                      factory.createIdentifier(argNames[name])
+                      ts.createIdentifier(argNames[name])
                     )
                   ),
                 ],
@@ -779,7 +732,7 @@ export default class ApiGenerator {
           const m = Object.entries(contentTypes).find(([type]) => {
             return !!_.get(body, ["content", type]);
           });
-          const initObj = factory.createObjectLiteralExpression(init, true);
+          const initObj = ts.createObjectLiteral(init, true);
           args.push(m ? callOazapftsFunction(m[1], [initObj]) : initObj); // json, form, multipart
         }
 
@@ -792,16 +745,12 @@ export default class ApiGenerator {
               },
               methodParams,
               cg.block(
-                factory.createReturnStatement(
+                ts.createReturn(
                   this.wrapResult(
                     callOazapftsFunction(
-                      {
-                        json: "fetchJson",
-                        text: "fetchText",
-                        blob: "fetchBlob",
-                      }[returnType],
+                      returnsJson ? "fetchJson" : "fetchText",
                       args,
-                      returnType === "json" || returnType === "blob"
+                      returnsJson
                         ? [
                             this.getTypeFromResponses(responses!) ||
                               ts.SyntaxKind.AnyKeyword,
@@ -818,12 +767,10 @@ export default class ApiGenerator {
       });
     });
 
-    Object.assign(stub, {
-      statements: cg.appendNodes(
-        stub.statements,
-        ...[...this.aliases, ...functions]
-      ),
-    });
+    stub.statements = cg.appendNodes(
+      stub.statements,
+      ...[...this.aliases, ...functions]
+    );
 
     return stub;
   }
