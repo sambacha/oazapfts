@@ -246,7 +246,7 @@ export default class ApiGenerator {
         _.upperFirst(schema.title || this.getRefBasename($ref))
       );
 
-      ref = this.refs[$ref] = ts.createTypeReferenceNode(name, undefined);
+      ref = this.refs[$ref] = factory.createTypeReferenceNode(name, undefined);
 
       const type = this.getTypeFromSchema(schema);
       this.aliases.push(
@@ -320,7 +320,7 @@ export default class ApiGenerator {
       );
     } else {
       // oneOf -> untagged union
-      return ts.createUnionTypeNode(variants.map(this.getTypeFromSchema));
+      return factory.createUnionTypeNode(variants.map(this.getTypeFromSchema));
     }
   }
 
@@ -356,19 +356,19 @@ export default class ApiGenerator {
     }
     if (schema.anyOf) {
       // anyOf -> union
-      return ts.createUnionTypeNode(
+      return factory.createUnionTypeNode(
         schema.anyOf.map(this.getTypeFromSchema.bind(this))
       );
     }
     if (schema.allOf) {
       // allOf -> intersection
-      return ts.createIntersectionTypeNode(
+      return factory.createIntersectionTypeNode(
         schema.allOf.map(this.getTypeFromSchema.bind(this))
       );
     }
     if ("items" in schema) {
       // items -> array
-      return ts.createArrayTypeNode(this.getTypeFromSchema(schema.items));
+      return factory.createArrayTypeNode(this.getTypeFromSchema(schema.items));
     }
     if (schema.properties || schema.additionalProperties) {
       // properties -> literal type
@@ -383,8 +383,14 @@ export default class ApiGenerator {
       const types = schema.enum.map((s) => {
         if (s === null) return cg.keywordType.null;
         if (typeof s === "boolean")
-          return s ? ts.createTrue() : ts.createFalse();
-        return ts.createLiteralTypeNode(ts.createStringLiteral(s));
+          return s
+            ? factory.createLiteralTypeNode(
+                ts.factory.createToken(ts.SyntaxKind.TrueKeyword)
+              )
+            : factory.createLiteralTypeNode(
+                ts.factory.createToken(ts.SyntaxKind.FalseKeyword)
+              );
+        return factory.createLiteralTypeNode(factory.createStringLiteral(s));
       });
       return types.length > 1 ? factory.createUnionTypeNode(types) : types[0];
     }
@@ -434,7 +440,7 @@ export default class ApiGenerator {
   }
 
   getTypeFromResponses(responses: OpenAPIV3.ResponsesObject) {
-    return ts.createUnionTypeNode(
+    return factory.createUnionTypeNode(
       Object.entries(responses).map(([code, res]) => {
         const statusType =
           code === "default"
@@ -529,7 +535,9 @@ export default class ApiGenerator {
 
     // ApiStub contains `const servers = {}`, find it ...
     const servers = cg.findFirstVariableDeclaration(stub.statements, "servers");
-    servers.initializer = generateServers(this.spec.servers || []);
+    (servers as any) /*hack?*/.initializer = generateServers(
+      this.spec.servers || []
+    );
 
     const { initializer } = cg.findFirstVariableDeclaration(
       stub.statements,
@@ -639,8 +647,8 @@ export default class ApiGenerator {
                   .map(({ name }) => ({ name: argNames[name] }))
               ),
               {
-                initializer: ts.createObjectLiteral(),
-                type: ts.createTypeLiteralNode(
+                initializer: factory.createObjectLiteralExpression(),
+                type: factory.createTypeLiteralNode(
                   optional.map((p) =>
                     cg.createPropertySignature({
                       name: argNames[this.resolve(p).name],
@@ -658,7 +666,10 @@ export default class ApiGenerator {
 
         methodParams.push(
           cg.createParameter("opts", {
-            type: ts.createTypeReferenceNode("Oazapfts.RequestOpts", undefined),
+            type: factory.createTypeReferenceNode(
+              "Oazapfts.RequestOpts",
+              undefined
+            ),
             questionToken: true,
           })
         );
@@ -688,35 +699,38 @@ export default class ApiGenerator {
 
         const url = createUrlExpression(path, qs);
         const init: ts.ObjectLiteralElementLike[] = [
-          ts.createSpreadAssignment(ts.createIdentifier("opts")),
+          factory.createSpreadAssignment(factory.createIdentifier("opts")),
         ];
 
         if (method !== "GET") {
           init.push(
-            ts.createPropertyAssignment(
+            factory.createPropertyAssignment(
               "method",
-              ts.createStringLiteral(method)
+              factory.createStringLiteral(method)
             )
           );
         }
 
         if (bodyVar) {
           init.push(
-            cg.createPropertyAssignment("body", ts.createIdentifier(bodyVar))
+            cg.createPropertyAssignment(
+              "body",
+              factory.createIdentifier(bodyVar)
+            )
           );
         }
 
         if (header.length) {
           init.push(
-            ts.createPropertyAssignment(
+            factory.createPropertyAssignment(
               "headers",
-              ts.createObjectLiteral(
+              factory.createObjectLiteralExpression(
                 [
-                  ts.createSpreadAssignment(
-                    ts.createLogicalAnd(
-                      ts.createIdentifier("opts"),
-                      ts.createPropertyAccess(
-                        ts.createIdentifier("opts"),
+                  factory.createSpreadAssignment(
+                    factory.createLogicalAnd(
+                      factory.createIdentifier("opts"),
+                      factory.createPropertyAccessExpression(
+                        factory.createIdentifier("opts"),
                         "headers"
                       )
                     )
@@ -724,7 +738,7 @@ export default class ApiGenerator {
                   ...header.map((name) =>
                     cg.createPropertyAssignment(
                       name,
-                      ts.createIdentifier(argNames[name])
+                      factory.createIdentifier(argNames[name])
                     )
                   ),
                 ],
@@ -740,7 +754,7 @@ export default class ApiGenerator {
           const m = Object.entries(contentTypes).find(([type]) => {
             return !!_.get(body, ["content", type]);
           });
-          const initObj = ts.createObjectLiteral(init, true);
+          const initObj = factory.createObjectLiteralExpression(init, true);
           args.push(m ? callOazapftsFunction(m[1], [initObj]) : initObj); // json, form, multipart
         }
 
@@ -753,7 +767,7 @@ export default class ApiGenerator {
               },
               methodParams,
               cg.block(
-                ts.createReturn(
+                factory.createReturnStatement(
                   this.wrapResult(
                     callOazapftsFunction(
                       returnsJson ? "fetchJson" : "fetchText",
@@ -775,7 +789,7 @@ export default class ApiGenerator {
       });
     });
 
-    stub.statements = cg.appendNodes(
+    (stub as any) /*hack*/.statements = cg.appendNodes(
       stub.statements,
       ...[...this.aliases, ...functions]
     );
