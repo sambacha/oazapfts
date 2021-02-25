@@ -43,7 +43,7 @@ jobs:
           CI: true
       - name: yarn build 
         run: |
-          yarn run compile
+          yarn run build
       - name: yarn test:e2e
         run: |
           yarn run test:e2e
