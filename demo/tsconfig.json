@@ -14,7 +14,7 @@
     "noUnusedLocals": false,
     "baseUrl": ".",
     "paths": {
-      "oazapfts/lib/*": ["../lib/*"]
+      "zgres/lib/*": ["../lib/*"]
     }
   }
 }

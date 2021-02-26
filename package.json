@@ -21,7 +21,7 @@
   ],
   "author": "Felix Gnass",
   "license": "MIT",
-  "repository": "sambacha/oazapfts",
+  "repository": "sambacha/zgres",
   "devDependencies": {
     "@types/jest": "^26.0.12",
     "@types/lodash": "^4.14.161",

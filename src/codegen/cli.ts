@@ -24,7 +24,7 @@ const [spec, dest] = argv._;
 if (!spec) {
   console.error(`
     Usage:
-    oazapfts <spec> [filename]
+    zgres <spec> [filename]
 
     Options:
     --exclude, -e <tag to exclude>
