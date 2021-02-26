@@ -1,9 +1,7 @@
-# 🍻 zgres!
+#  🐘 zgres 
 
 Generate TypeScript clients to tap into OpenAPI servers.
-
-[![Build Status](https://travis-ci.org/cellular/zgres.svg?branch=master)](https://travis-ci.org/cellular/zgres)
-
+[![nodejs](https://github.com/sambacha/oazapfts/actions/workflows/nodejs.yml/badge.svg)](https://github.com/sambacha/oazapfts/actions/workflows/nodejs.yml)
 ## Features
 
 - **AST-based**:
