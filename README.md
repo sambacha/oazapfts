@@ -1,7 +1,14 @@
-#  🐘 zgres 
 
-Generate TypeScript clients to tap into OpenAPI servers.
+  <div>
+    <center><h1> 🐘 zgres  </h1></center>
+  </div>
+  </center>
+  <br>
+  
 [![nodejs](https://github.com/sambacha/oazapfts/actions/workflows/nodejs.yml/badge.svg)](https://github.com/sambacha/oazapfts/actions/workflows/nodejs.yml)
+
+> Generate TypeScript clients to tap into OpenAPI servers.
+
 ## Features
 
 - **AST-based**:
