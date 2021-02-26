@@ -124,16 +124,16 @@ export function callQsFunction(name: string, args: ts.Expression[]) {
 }
 
 /**
- * Create a call expression for one of the oazapfts runtime functions.
+ * Create a call expression for one of the zgres runtime functions.
  */
-export function callOazapftsFunction(
+export function callZgresFunction(
   name: string,
   args: ts.Expression[],
   typeArgs?: ts.TypeNode[]
 ) {
   return cg.createCall(
     factory.createPropertyAccessExpression(
-      factory.createIdentifier("oazapfts"),
+      factory.createIdentifier("zgres"),
       name
     ),
     { args, typeArgs }
@@ -525,7 +525,7 @@ export default class ApiGenerator {
     }
 
   wrapResult(ex: ts.Expression) {
-    return this.opts?.optimistic ? callOazapftsFunction("ok", [ex]) : ex;
+    return this.opts?.optimistic ? callZgresFunction("ok", [ex]) : ex;
   }
 
   generateApi() {
@@ -671,7 +671,7 @@ export default class ApiGenerator {
         methodParams.push(
           cg.createParameter("opts", {
             type: factory.createTypeReferenceNode(
-              "Oazapfts.RequestOpts",
+              "Zgres.RequestOpts",
               undefined
             ),
             questionToken: true,
@@ -759,7 +759,7 @@ export default class ApiGenerator {
             return !!_.get(body, ["content", type]);
           });
           const initObj = factory.createObjectLiteralExpression(init, true);
-          args.push(m ? callOazapftsFunction(m[1], [initObj]) : initObj); // json, form, multipart
+          args.push(m ? callZgresFunction(m[1], [initObj]) : initObj); // json, form, multipart
         }
 
         functions.push(
@@ -773,7 +773,7 @@ export default class ApiGenerator {
               cg.block(
                 factory.createReturnStatement(
                   this.wrapResult(
-                    callOazapftsFunction(
+                    callZgresFunction(
                       returnsJson ? "fetchJson" : "fetchText",
                       args,
                       returnsJson

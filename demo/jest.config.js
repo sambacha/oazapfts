@@ -3,7 +3,7 @@ module.exports = {
   testMatch: ["**/*.test.ts"],
   moduleFileExtensions: ["js", "ts"],
   moduleNameMapper: {
-    "^oazapfts/lib/(.+)$": "<rootDir>/../src/$1",
+    "^zgres/lib/(.+)$": "<rootDir>/../src/$1",
   },
   restoreMocks: true,
   transform: {

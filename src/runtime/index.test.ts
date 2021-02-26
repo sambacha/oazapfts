@@ -1,6 +1,6 @@
-import * as Oazapfts from ".";
+import * as Zgres from ".";
 
-const oazapfts = Oazapfts.runtime({});
+const zgres = Zgres.runtime({});
 
 const fetchMock = () => ({
   ok: true,
@@ -21,7 +21,7 @@ describe("request", () => {
   it("should use global fetch", async () => {
     jest.spyOn(g, "fetch").mockImplementationOnce(fetchMock);
 
-    await oazapfts.fetchText("bar", { baseUrl: "foo/" });
+    await zgres.fetchText("bar", { baseUrl: "foo/" });
 
     expect(g.fetch).toHaveBeenCalledWith("foo/bar", expect.any(Object));
   });
@@ -30,7 +30,7 @@ describe("request", () => {
     jest.spyOn(g, "fetch");
     const customFetch = jest.fn(fetchMock);
 
-    await oazapfts.fetchText("bar", {
+    await zgres.fetchText("bar", {
       baseUrl: "foo/",
       fetch: customFetch as any,
     });

@@ -1,15 +1,15 @@
 /**
  * Swagger Petstore
  * 1.0.0
- * DO NOT MODIFY - This file has been generated using oazapfts.
- * See https://www.npmjs.com/package/oazapfts
+ * DO NOT MODIFY - This file has been generated using zgres.
+ * See https://www.npmjs.com/package/zgres
  */
-import * as Oazapfts from "oazapfts/lib/runtime";
-import * as QS from "oazapfts/lib/runtime/query";
-export const defaults: Oazapfts.RequestOpts = {
-  baseUrl: "https://petstore.swagger.io/v2",
+import * as Zgres from "zgres/lib/runtime";
+import * as QS from "zgres/lib/runtime/query";
+export const defaults: Zgres.RequestOpts = {
+    baseUrl: "https://petstore.swagger.io/v2",
 };
-const oazapfts = Oazapfts.runtime(defaults);
+const zgres = Zgres.runtime(defaults);
 export const servers = {
   server1: "https://petstore.swagger.io/v2",
   server2: "http://petstore.swagger.io/v2",
@@ -59,9 +59,8 @@ export type Schema2 = number;
 /**
  * Update an existing pet
  */
-export function updatePet(pet: Pet, opts?: Oazapfts.RequestOpts) {
-  return oazapfts.fetchJson<
-    | {
+export function updatePet(pet: Pet, opts?: Zgres.RequestOpts) {
+    return zgres.fetchJson<{
         status: 204;
         data: string;
       }
@@ -74,22 +73,17 @@ export function updatePet(pet: Pet, opts?: Oazapfts.RequestOpts) {
         data: {
           errors?: string[];
         };
-      }
-  >(
-    "/pet",
-    oazapfts.json({
-      ...opts,
-      method: "PUT",
-      body: pet,
-    })
-  );
+    }>("/pet", zgres.json({
+        ...opts,
+        method: "PUT",
+        body: pet
+    }));
 }
 /**
  * Add a new pet to the store
  */
-export function addPet(pet: Pet, opts?: Oazapfts.RequestOpts) {
-  return oazapfts.fetchJson<
-    | {
+export function addPet(pet: Pet, opts?: Zgres.RequestOpts) {
+    return zgres.fetchJson<{
         status: 200;
         data: Pet;
       }
@@ -98,25 +92,17 @@ export function addPet(pet: Pet, opts?: Oazapfts.RequestOpts) {
         data: {
           id?: string;
         };
-      }
-  >(
-    "/pet",
-    oazapfts.json({
-      ...opts,
-      method: "POST",
-      body: pet,
-    })
-  );
+    }>("/pet", zgres.json({
+        ...opts,
+        method: "POST",
+        body: pet
+    }));
 }
 /**
  * Finds Pets by status
  */
-export function findPetsByStatus(
-  status: ("available" | "pending" | "sold")[],
-  opts?: Oazapfts.RequestOpts
-) {
-  return oazapfts.fetchJson<
-    | {
+export function findPetsByStatus(status: ("available" | "pending" | "sold")[], opts?: Zgres.RequestOpts) {
+    return zgres.fetchJson<{
         status: 200;
         data: Pet[];
       }
@@ -138,9 +124,8 @@ export function findPetsByStatus(
 /**
  * Finds Pets by tags
  */
-export function findPetsByTags(tags: string[], opts?: Oazapfts.RequestOpts) {
-  return oazapfts.fetchJson<
-    | {
+export function findPetsByTags(tags: string[], opts?: Zgres.RequestOpts) {
+    return zgres.fetchJson<{
         status: 200;
         data: Pet[];
       }
@@ -162,9 +147,8 @@ export function findPetsByTags(tags: string[], opts?: Oazapfts.RequestOpts) {
 /**
  * Find pet by ID
  */
-export function getPetById(petId: number, opts?: Oazapfts.RequestOpts) {
-  return oazapfts.fetchJson<
-    | {
+export function getPetById(petId: number, opts?: Zgres.RequestOpts) {
+    return zgres.fetchJson<{
         status: 200;
         data: Pet;
       }
@@ -187,17 +171,12 @@ export function updatePetWithForm(
   body?: {
     name?: string;
     status?: string;
-  },
-  opts?: Oazapfts.RequestOpts
-) {
-  return oazapfts.fetchText(
-    `/pet/${petId}`,
-    oazapfts.form({
-      ...opts,
-      method: "POST",
-      body,
-    })
-  );
+}, opts?: Zgres.RequestOpts) {
+    return zgres.fetchText(`/pet/${petId}`, zgres.form({
+        ...opts,
+        method: "POST",
+        body
+    }));
 }
 /**
  * Deletes a pet
@@ -208,17 +187,15 @@ export function deletePet(
     apiKey,
   }: {
     apiKey?: string;
-  } = {},
-  opts?: Oazapfts.RequestOpts
-) {
-  return oazapfts.fetchText(`/pet/${petId}`, {
-    ...opts,
-    method: "DELETE",
-    headers: {
-      ...(opts && opts.headers),
-      api_key: apiKey,
-    },
-  });
+} = {}, opts?: Zgres.RequestOpts) {
+    return zgres.fetchText(`/pet/${petId}`, {
+        ...opts,
+        method: "DELETE",
+        headers: {
+            ...opts && opts.headers,
+            api_key: apiKey
+        }
+    });
 }
 /**
  * uploads an image
@@ -228,62 +205,51 @@ export function uploadFile(
   body?: {
     additionalMetadata?: string;
     file?: Blob;
-  },
-  opts?: Oazapfts.RequestOpts
-) {
-  return oazapfts.fetchJson<{
-    status: 200;
-    data: ApiResponse;
-  }>(
-    `/pet/${petId}/uploadImage`,
-    oazapfts.multipart({
-      ...opts,
-      method: "POST",
-      body,
-    })
-  );
+}, opts?: Zgres.RequestOpts) {
+    return zgres.fetchJson<{
+        status: 200;
+        data: ApiResponse;
+    }>(`/pet/${petId}/uploadImage`, zgres.multipart({
+        ...opts,
+        method: "POST",
+        body
+    }));
 }
 /**
  * Returns pet inventories by status
  */
-export function getInventory(opts?: Oazapfts.RequestOpts) {
-  return oazapfts.fetchJson<{
-    status: 200;
-    data: {
-      [key: string]: number;
-    };
-  }>("/store/inventory", {
-    ...opts,
-  });
+export function getInventory(opts?: Zgres.RequestOpts) {
+    return zgres.fetchJson<{
+        status: 200;
+        data: {
+            [key: string]: number;
+        };
+    }>("/store/inventory", {
+        ...opts
+    });
 }
 /**
  * Place an order for a pet
  */
-export function placeOrder(order: Order, opts?: Oazapfts.RequestOpts) {
-  return oazapfts.fetchJson<
-    | {
+export function placeOrder(order: Order, opts?: Zgres.RequestOpts) {
+    return zgres.fetchJson<{
         status: 200;
         data: Order;
       }
     | {
         status: 400;
         data: string;
-      }
-  >(
-    "/store/order",
-    oazapfts.json({
-      ...opts,
-      method: "POST",
-      body: order,
-    })
-  );
+    }>("/store/order", zgres.json({
+        ...opts,
+        method: "POST",
+        body: order
+    }));
 }
 /**
  * Find purchase order by ID
  */
-export function getOrderById(orderId: number, opts?: Oazapfts.RequestOpts) {
-  return oazapfts.fetchJson<
-    | {
+export function getOrderById(orderId: number, opts?: Zgres.RequestOpts) {
+    return zgres.fetchJson<{
         status: 200;
         data: Order;
       }
@@ -302,67 +268,47 @@ export function getOrderById(orderId: number, opts?: Oazapfts.RequestOpts) {
 /**
  * Delete purchase order by ID
  */
-export function deleteOrder(orderId: number, opts?: Oazapfts.RequestOpts) {
-  return oazapfts.fetchText(`/store/order/${orderId}`, {
-    ...opts,
-    method: "DELETE",
-  });
+export function deleteOrder(orderId: number, opts?: Zgres.RequestOpts) {
+    return zgres.fetchText(`/store/order/${orderId}`, {
+        ...opts,
+        method: "DELETE"
+    });
 }
 /**
  * Create user
  */
-export function createUser(user: User, opts?: Oazapfts.RequestOpts) {
-  return oazapfts.fetchText(
-    "/user",
-    oazapfts.json({
-      ...opts,
-      method: "POST",
-      body: user,
-    })
-  );
+export function createUser(user: User, opts?: Zgres.RequestOpts) {
+    return zgres.fetchText("/user", zgres.json({
+        ...opts,
+        method: "POST",
+        body: user
+    }));
 }
 /**
  * Creates list of users with given input array
  */
-export function createUsersWithArrayInput(
-  body: User[],
-  opts?: Oazapfts.RequestOpts
-) {
-  return oazapfts.fetchText(
-    "/user/createWithArray",
-    oazapfts.json({
-      ...opts,
-      method: "POST",
-      body,
-    })
-  );
+export function createUsersWithArrayInput(body: User[], opts?: Zgres.RequestOpts) {
+    return zgres.fetchText("/user/createWithArray", zgres.json({
+        ...opts,
+        method: "POST",
+        body
+    }));
 }
 /**
  * Creates list of users with given input array
  */
-export function createUsersWithListInput(
-  body: User[],
-  opts?: Oazapfts.RequestOpts
-) {
-  return oazapfts.fetchText(
-    "/user/createWithList",
-    oazapfts.json({
-      ...opts,
-      method: "POST",
-      body,
-    })
-  );
+export function createUsersWithListInput(body: User[], opts?: Zgres.RequestOpts) {
+    return zgres.fetchText("/user/createWithList", zgres.json({
+        ...opts,
+        method: "POST",
+        body
+    }));
 }
 /**
  * Logs user into the system
  */
-export function loginUser(
-  username: string,
-  password: string,
-  opts?: Oazapfts.RequestOpts
-) {
-  return oazapfts.fetchJson<
-    | {
+export function loginUser(username: string, password: string, opts?: Zgres.RequestOpts) {
+    return zgres.fetchJson<{
         status: 200;
         data: string;
       }
@@ -385,17 +331,16 @@ export function loginUser(
 /**
  * Logs out current logged in user session
  */
-export function logoutUser(opts?: Oazapfts.RequestOpts) {
-  return oazapfts.fetchText("/user/logout", {
-    ...opts,
-  });
+export function logoutUser(opts?: Zgres.RequestOpts) {
+    return zgres.fetchText("/user/logout", {
+        ...opts
+    });
 }
 /**
  * Get user by user name
  */
-export function getUserByName(username: string, opts?: Oazapfts.RequestOpts) {
-  return oazapfts.fetchJson<
-    | {
+export function getUserByName(username: string, opts?: Zgres.RequestOpts) {
+    return zgres.fetchJson<{
         status: 200;
         data: User;
       }
@@ -414,28 +359,21 @@ export function getUserByName(username: string, opts?: Oazapfts.RequestOpts) {
 /**
  * Updated user
  */
-export function updateUser(
-  username: string,
-  user: User,
-  opts?: Oazapfts.RequestOpts
-) {
-  return oazapfts.fetchText(
-    `/user/${username}`,
-    oazapfts.json({
-      ...opts,
-      method: "PUT",
-      body: user,
-    })
-  );
+export function updateUser(username: string, user: User, opts?: Zgres.RequestOpts) {
+    return zgres.fetchText(`/user/${username}`, zgres.json({
+        ...opts,
+        method: "PUT",
+        body: user
+    }));
 }
 /**
  * Delete user
  */
-export function deleteUser(username: string, opts?: Oazapfts.RequestOpts) {
-  return oazapfts.fetchText(`/user/${username}`, {
-    ...opts,
-    method: "DELETE",
-  });
+export function deleteUser(username: string, opts?: Zgres.RequestOpts) {
+    return zgres.fetchText(`/user/${username}`, {
+        ...opts,
+        method: "DELETE"
+    });
 }
 export function customizePet(
   {
@@ -446,12 +384,8 @@ export function customizePet(
     furColor?: string;
     color?: string;
     xColorOptions?: string;
-  } = {},
-  opts?: Oazapfts.RequestOpts
-) {
-  return oazapfts.fetchText(
-    `/pet/customize${QS.query(
-      QS.form({
+} = {}, opts?: Zgres.RequestOpts) {
+    return zgres.fetchText(`/pet/customize${QS.query(QS.form({
         "fur.color": furColor,
         color,
       })
@@ -476,12 +410,8 @@ export function getIssue31ByFoo(
     bar?: Schema;
     baz?: number;
     boo?: Schema2;
-  } = {},
-  opts?: Oazapfts.RequestOpts
-) {
-  return oazapfts.fetchText(
-    `/issue31/${foo}${QS.query(
-      QS.form({
+} = {}, opts?: Zgres.RequestOpts) {
+    return zgres.fetchText(`/issue31/${foo}${QS.query(QS.form({
         bar,
         baz,
         boo,

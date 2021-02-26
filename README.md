@@ -1,13 +1,13 @@
-# 🍻 oazapfts!
+# 🍻 zgres!
 
 Generate TypeScript clients to tap into OpenAPI servers.
 
-[![Build Status](https://travis-ci.org/cellular/oazapfts.svg?branch=master)](https://travis-ci.org/cellular/oazapfts)
+[![Build Status](https://travis-ci.org/cellular/zgres.svg?branch=master)](https://travis-ci.org/cellular/zgres)
 
 ## Features
 
 - **AST-based**:
-  Unlike other code generators `oazapfts` does not use templates to generate code but uses TypeScript's built-in API to generate and pretty-print an abstract syntax tree.
+  Unlike other code generators `zgres` does not use templates to generate code but uses TypeScript's built-in API to generate and pretty-print an abstract syntax tree.
 - **Fast**: The cli does not use any of the common Java-based tooling, so the code generation is super fast.
 - **Tree-shakeable**: Individually exported functions allow you to bundle only the ones you actually use.
 - **Human friendly signatures**: The generated api methods don't leak an HTTP-specific implementation details. For example, all optional parameters are grouped together in one object, no matter whether they end up in the headers, path or query-string.
@@ -15,15 +15,15 @@ Generate TypeScript clients to tap into OpenAPI servers.
 ## Installation
 
 ```
-npm install oazapfts
+npm install zgres
 ```
 
-**NOTE:** With version 3.0.0 oazapfts has become a runtime dependency and the generated code does no longer include all the fetch logic.
+**NOTE:** With version 3.0.0 zgres has become a runtime dependency and the generated code does no longer include all the fetch logic.
 
 ## Usage
 
 ```
-oazapfts <spec> [filename]
+zgres <spec> [filename]
 
 Options:
 --exclude, -e tag to exclude
@@ -99,7 +99,7 @@ if (res.status === 404) {
 The above code can be simplified by using the `handle` helper:
 
 ```ts
-import { handle } from "oazapfts";
+import { handle } from "zgres";
 
 await handle(api.getPetById(1), {
   200(pet) {
@@ -129,7 +129,7 @@ await handle(api.getPetById(1), {
 Instead of handling errors right in place we can also use the `ok` helper:
 
 ```ts
-import { ok } from "oazapfts";
+import { ok } from "zgres";
 
 const pet = await ok(api.getPetById(1));
 ```
@@ -139,7 +139,7 @@ With this pattern `pet` will be typed as `Pet` and a `HttpError` will be thrown 
 You can even turn your whole API into an optimistic one:
 
 ```ts
-import { optimistic } from "oazapfts";
+import { optimistic } from "zgres";
 import * as rawApi from "./api.ts";
 
 const api = optimistic(rawApi);

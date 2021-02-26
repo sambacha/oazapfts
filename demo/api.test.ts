@@ -1,4 +1,4 @@
-import { ok, handle, okify, optimistic } from "oazapfts/lib/index";
+import { ok, handle, okify, optimistic } from "zgres/lib/index";
 import * as api from "./api";
 import * as optimisticApi from "./optimisticApi";
 
