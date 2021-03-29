@@ -1,17 +1,17 @@
 {
   "name": "zgres",
   "version": "3.3.1",
-  "description": "OpenApi TypeScript client generator",
+  "description": "API TypeScript client generator",
   "main": "lib/index.js",
   "bin": {
     "opentsgen": "./lib/codegen/cli.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "npx tsc -b",
     "test": "npm run test:unit && npm run test:e2e",
-    "test:unit": "jest",
+    "test:unit": "npx jest --config jest.config.js",
     "test:e2e": "npm run generate-demo && with-server 'cd demo && jest'",
-    "start": "open-api-mocker -p $PORT -s demo/petstore.json",
+    "start": "npx open-api-mocker -p $PORT -s demo/petstore.json",
     "generate-demo": "npm run prepare && ./lib/codegen/cli.js ./demo/petstore.json ./demo/api.ts && ./lib/codegen/cli.js --optimistic ./demo/petstore.json ./demo/optimisticApi.ts && prettier -w demo",
     "prepare": "npm run build && chmod +x ./lib/codegen/cli.js"
   },
@@ -19,7 +19,7 @@
     "openapi",
     "typescript"
   ],
-  "author": "Felix Gnass",
+  "author": "SEE CONTRIBUTORS",
   "license": "MIT",
   "repository": "sambacha/zgres",
   "devDependencies": {
@@ -52,6 +52,6 @@
     }
   },
   "lint-staged": {
-    "*.{ts,js,json,md}": "prettier --write"
+    "*.{ts,js,json,md}": "npx prettier --write"
   }
 }

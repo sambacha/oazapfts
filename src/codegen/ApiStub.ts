@@ -1,6 +1,8 @@
 /**
- * DO NOT MODIFY - This file has been generated using zgres.
- * See https://www.npmjs.com/package/zgres
+ * @file
+ * @licnese
+ * @exports
+ * @version
  */
 
 import * as Zgres from 'zgres/lib/runtime';
