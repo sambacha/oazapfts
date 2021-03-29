@@ -1,15 +1,8 @@
-import fs from "fs";
-import ts, { factory } from "typescript";
+import fs from 'fs';
+import ts, { factory } from 'typescript';
 
 ts.parseIsolatedEntityName;
-type KeywordTypeName =
-  | "any"
-  | "number"
-  | "object"
-  | "string"
-  | "boolean"
-  | "undefined"
-  | "null";
+type KeywordTypeName = 'any' | 'number' | 'object' | 'string' | 'boolean' | 'undefined' | 'null';
 
 export const questionToken = factory.createToken(ts.SyntaxKind.QuestionToken);
 
@@ -21,22 +14,20 @@ export function createQuestionToken(token?: boolean | ts.QuestionToken) {
 
 export function createKeywordType(type: KeywordTypeName) {
   switch (type) {
-    case "any":
+    case 'any':
       return factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword);
-    case "number":
+    case 'number':
       return factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword);
-    case "object":
+    case 'object':
       return factory.createKeywordTypeNode(ts.SyntaxKind.ObjectKeyword);
-    case "string":
+    case 'string':
       return factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword);
-    case "boolean":
+    case 'boolean':
       return factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword);
-    case "undefined":
+    case 'undefined':
       return factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword);
-    case "null":
-      return factory.createLiteralTypeNode(
-        ts.factory.createToken(ts.SyntaxKind.NullKeyword)
-      );
+    case 'null':
+      return factory.createLiteralTypeNode(ts.factory.createToken(ts.SyntaxKind.NullKeyword));
   }
 }
 
@@ -49,9 +40,7 @@ export const keywordType: {
   string: factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword),
   boolean: factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword),
   undefined: factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword),
-  null: factory.createLiteralTypeNode(
-    ts.factory.createToken(ts.SyntaxKind.NullKeyword)
-  ),
+  null: factory.createLiteralTypeNode(ts.factory.createToken(ts.SyntaxKind.NullKeyword)),
 };
 
 export const modifier = {
@@ -72,17 +61,11 @@ export function createTypeAliasDeclaration({
   typeParameters?: Array<ts.TypeParameterDeclaration>;
   type: ts.TypeNode;
 }) {
-  return factory.createTypeAliasDeclaration(
-    decorators,
-    modifiers,
-    name,
-    typeParameters,
-    type
-  );
+  return factory.createTypeAliasDeclaration(decorators, modifiers, name, typeParameters, type);
 }
 
 export function toExpression(ex: ts.Expression | string) {
-  if (typeof ex === "string") return factory.createIdentifier(ex);
+  if (typeof ex === 'string') return factory.createIdentifier(ex);
   return ex;
 }
 
@@ -94,7 +77,7 @@ export function createCall(
   }: {
     typeArgs?: Array<ts.TypeNode>;
     args?: Array<ts.Expression>;
-  } = {}
+  } = {},
 ) {
   return factory.createCallExpression(toExpression(expression), typeArgs, args);
 }
@@ -104,27 +87,19 @@ export function createMethodCall(
   opts: {
     typeArgs?: Array<ts.TypeNode>;
     args?: Array<ts.Expression>;
-  }
+  },
 ) {
-  return createCall(
-    factory.createPropertyAccessExpression(factory.createThis(), method),
-    opts
-  );
+  return createCall(factory.createPropertyAccessExpression(factory.createThis(), method), opts);
 }
 
 export function createObjectLiteral(props: [string, string | ts.Expression][]) {
   return factory.createObjectLiteralExpression(
-    props.map(([name, identifier]) =>
-      createPropertyAssignment(name, toExpression(identifier))
-    ),
-    true
+    props.map(([name, identifier]) => createPropertyAssignment(name, toExpression(identifier))),
+    true,
   );
 }
 
-export function createPropertyAssignment(
-  name: string,
-  expression: ts.Expression
-) {
+export function createPropertyAssignment(name: string, expression: ts.Expression) {
   if (ts.isIdentifier(expression)) {
     if (expression.text === name) {
       return factory.createShorthandPropertyAssignment(name);
@@ -150,7 +125,7 @@ export function createArrowFunction(
     typeParameters?: ts.TypeParameterDeclaration[];
     type?: ts.TypeNode;
     equalsGreaterThanToken?: ts.EqualsGreaterThanToken;
-  } = {}
+  } = {},
 ) {
   return factory.createArrowFunction(
     modifiers,
@@ -158,7 +133,7 @@ export function createArrowFunction(
     parameters,
     type,
     equalsGreaterThanToken,
-    body
+    body,
   );
 }
 
@@ -178,7 +153,7 @@ export function createFunctionDeclaration(
     type?: ts.TypeNode;
   },
   parameters: ts.ParameterDeclaration[],
-  body?: ts.Block
+  body?: ts.Block,
 ): ts.FunctionDeclaration {
   return factory.createFunctionDeclaration(
     decorators,
@@ -188,7 +163,7 @@ export function createFunctionDeclaration(
     typeParameters,
     parameters,
     type,
-    body
+    body,
   );
 }
 
@@ -213,7 +188,7 @@ export function createClassDeclaration({
     name,
     typeParameters,
     heritageClauses,
-    members
+    members,
   );
 }
 
@@ -228,21 +203,11 @@ export function createConstructor({
   parameters: Array<ts.ParameterDeclaration>;
   body?: ts.Block;
 }) {
-  return factory.createConstructorDeclaration(
-    decorators,
-    modifiers,
-    parameters,
-    body
-  );
+  return factory.createConstructorDeclaration(decorators, modifiers, parameters, body);
 }
 
 export function createMethod(
-  name:
-    | string
-    | ts.Identifier
-    | ts.StringLiteral
-    | ts.NumericLiteral
-    | ts.ComputedPropertyName,
+  name: string | ts.Identifier | ts.StringLiteral | ts.NumericLiteral | ts.ComputedPropertyName,
   {
     decorators,
     modifiers,
@@ -259,7 +224,7 @@ export function createMethod(
     type?: ts.TypeNode;
   } = {},
   parameters: ts.ParameterDeclaration[] = [],
-  body?: ts.Block
+  body?: ts.Block,
 ): ts.MethodDeclaration {
   return factory.createMethodDeclaration(
     decorators,
@@ -270,7 +235,7 @@ export function createMethod(
     typeParameters,
     parameters,
     type,
-    body
+    body,
   );
 }
 
@@ -290,7 +255,7 @@ export function createParameter(
     questionToken?: ts.QuestionToken | boolean;
     type?: ts.TypeNode;
     initializer?: ts.Expression;
-  }
+  },
 ): ts.ParameterDeclaration {
   return factory.createParameterDeclaration(
     decorators,
@@ -299,12 +264,12 @@ export function createParameter(
     name,
     createQuestionToken(questionToken),
     type,
-    initializer
+    initializer,
   );
 }
 
 function propertyName(name: string | ts.PropertyName): ts.PropertyName {
-  if (typeof name === "string") {
+  if (typeof name === 'string') {
     return isValidIdentifier(name)
       ? factory.createIdentifier(name)
       : factory.createStringLiteral(name);
@@ -327,7 +292,7 @@ export function createPropertySignature({
     modifiers,
     propertyName(name),
     createQuestionToken(questionToken),
-    type
+    type,
   );
 }
 
@@ -336,20 +301,20 @@ export function createIndexSignature(
   {
     decorators,
     modifiers,
-    indexName = "key",
+    indexName = 'key',
     indexType = keywordType.string,
   }: {
     indexName?: string;
     indexType?: ts.TypeNode;
     decorators?: Array<ts.Decorator>;
     modifiers?: Array<ts.Modifier>;
-  } = {}
+  } = {},
 ) {
   return factory.createIndexSignature(
     decorators,
     modifiers,
     [createParameter(indexName, { type: indexType })],
-    type
+    type,
   );
 }
 
@@ -359,23 +324,18 @@ export function createObjectBinding(
     dotDotDotToken?: ts.DotDotDotToken;
     propertyName?: string | ts.PropertyName;
     initializer?: ts.Expression;
-  }>
+  }>,
 ) {
   return factory.createObjectBindingPattern(
     elements.map(({ dotDotDotToken, propertyName, name, initializer }) =>
-      factory.createBindingElement(
-        dotDotDotToken,
-        propertyName,
-        name,
-        initializer
-      )
-    )
+      factory.createBindingElement(dotDotDotToken, propertyName, name, initializer),
+    ),
   );
 }
 
 export function createTemplateString(
   head: string,
-  spans: Array<{ literal: string; expression: ts.Expression }>
+  spans: Array<{ literal: string; expression: ts.Expression }>,
 ) {
   if (!spans.length) return factory.createStringLiteral(head);
   return factory.createTemplateExpression(
@@ -385,20 +345,18 @@ export function createTemplateString(
         expression,
         i === spans.length - 1
           ? factory.createTemplateTail(literal)
-          : factory.createTemplateMiddle(literal)
-      )
-    )
+          : factory.createTemplateMiddle(literal),
+      ),
+    ),
   );
 }
 
 export function findNode<T extends ts.Node>(
   nodes: ts.NodeArray<ts.Node>,
   kind: T extends { kind: infer K } ? K : never,
-  test?: (node: T) => boolean | undefined
+  test?: (node: T) => boolean | undefined,
 ): T {
-  const node = nodes.find(
-    (s) => s.kind === kind && (!test || test(s as T))
-  ) as T;
+  const node = nodes.find((s) => s.kind === kind && (!test || test(s as T))) as T;
   if (!node) throw new Error(`Node not found: ${kind}`);
   return node;
 }
@@ -410,36 +368,31 @@ export function getName(name: ts.Node) {
   if (ts.isLiteralExpression(name)) {
     return name.text;
   }
-  return "";
+  return '';
 }
 
 export function getFirstDeclarationName(n: ts.VariableStatement) {
   const name = ts.getNameOfDeclaration(n.declarationList.declarations[0]);
-  return name ? getName(name) : "";
+  return name ? getName(name) : '';
 }
 
-export function findFirstVariableDeclaration(
-  nodes: ts.NodeArray<ts.Node>,
-  name: string
-) {
+export function findFirstVariableDeclaration(nodes: ts.NodeArray<ts.Node>, name: string) {
   const statement = findNode<ts.VariableStatement>(
     nodes,
     ts.SyntaxKind.VariableStatement,
-    (n) => getFirstDeclarationName(n) === name
+    (n) => getFirstDeclarationName(n) === name,
   );
   const [first] = statement.declarationList.declarations;
-  if (!first) throw new Error("Missing declaration");
+  if (!first) throw new Error('Missing declaration');
   return first;
 }
 
 export function changePropertyValue(
   o: ts.ObjectLiteralExpression,
   property: string,
-  value: ts.Expression
+  value: ts.Expression,
 ) {
-  const p = o.properties.find(
-    (p) => ts.isPropertyAssignment(p) && getName(p.name) === property
-  );
+  const p = o.properties.find((p) => ts.isPropertyAssignment(p) && getName(p.name) === property);
   if (p && ts.isPropertyAssignment(p)) {
     // p.initializer is readonly, this might break in a future TS version, but works fine for now.
     Object.assign(p, { initializer: value });
@@ -448,10 +401,7 @@ export function changePropertyValue(
   }
 }
 
-export function appendNodes<T extends ts.Node>(
-  array: ts.NodeArray<T>,
-  ...nodes: T[]
-) {
+export function appendNodes<T extends ts.Node>(array: ts.NodeArray<T>, ...nodes: T[]) {
   return factory.createNodeArray([...array, ...nodes]);
 }
 
@@ -460,18 +410,18 @@ export function addComment<T extends ts.Node>(node: T, comment?: string) {
   return ts.addSyntheticLeadingComment(
     node,
     ts.SyntaxKind.MultiLineCommentTrivia,
-    `*\n * ${comment.replace(/\n/g, "\n * ")}\n `,
-    true
+    `*\n * ${comment.replace(/\n/g, '\n * ')}\n `,
+    true,
   );
 }
 
 export function parseFile(file: string) {
   return ts.createSourceFile(
     file,
-    fs.readFileSync(file, "utf8"),
+    fs.readFileSync(file, 'utf8'),
     ts.ScriptTarget.Latest,
     /*setParentNodes*/ false,
-    ts.ScriptKind.TS
+    ts.ScriptKind.TS,
   );
 }
 
@@ -481,26 +431,24 @@ const printer = ts.createPrinter({
 
 export function printNode(node: ts.Node) {
   const file = ts.createSourceFile(
-    "someFileName.ts",
-    "",
+    'someFileName.ts',
+    '',
     ts.ScriptTarget.Latest,
     /*setParentNodes*/ false,
-    ts.ScriptKind.TS
+    ts.ScriptKind.TS,
   );
   return printer.printNode(ts.EmitHint.Unspecified, node, file);
 }
 
 export function printNodes(nodes: ts.Node[]) {
   const file = ts.createSourceFile(
-    "someFileName.ts",
-    "",
+    'someFileName.ts',
+    '',
     ts.ScriptTarget.Latest,
     /*setParentNodes*/ false,
-    ts.ScriptKind.TS
+    ts.ScriptKind.TS,
   );
-  return nodes
-    .map((node) => printer.printNode(ts.EmitHint.Unspecified, node, file))
-    .join("\n");
+  return nodes.map((node) => printer.printNode(ts.EmitHint.Unspecified, node, file)).join('\n');
 }
 
 export function printFile(sourceFile: ts.SourceFile) {
@@ -510,9 +458,5 @@ export function printFile(sourceFile: ts.SourceFile) {
 export function isValidIdentifier(str: string) {
   if (!str.length || str.trim() !== str) return false;
   const node = ts.parseIsolatedEntityName(str, ts.ScriptTarget.Latest);
-  return (
-    !!node &&
-    node.kind === ts.SyntaxKind.Identifier &&
-    node.originalKeywordKind === undefined
-  );
+  return !!node && node.kind === ts.SyntaxKind.Identifier && node.originalKeywordKind === undefined;
 }

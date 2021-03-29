@@ -3,11 +3,11 @@
  * See https://www.npmjs.com/package/zgres
  */
 
-import * as Zgres from "zgres/lib/runtime";
-import * as QS from "zgres/lib/runtime/query";
+import * as Zgres from 'zgres/lib/runtime';
+import * as QS from 'zgres/lib/runtime/query';
 
 export const defaults: Zgres.RequestOpts = {
-  baseUrl: "/",
+  baseUrl: '/',
 };
 
 const zgres = Zgres.runtime(defaults);

@@ -1,9 +1,9 @@
-import * as cg from "./tscodegen";
-import ApiGenerator from "./generate";
-import ts from "typescript";
-import SwaggerParser from "@apidevtools/swagger-parser";
-import converter from "swagger2openapi";
-import { OpenAPIV3 } from "openapi-types";
+import * as cg from './tscodegen';
+import ApiGenerator from './generate';
+import ts from 'typescript';
+import SwaggerParser from '@apidevtools/swagger-parser';
+import converter from 'swagger2openapi';
+import { OpenAPIV3 } from 'openapi-types';
 
 export { cg };
 
@@ -24,7 +24,7 @@ export function printAst(ast: ts.SourceFile) {
 export async function generateSource(spec: string, opts: Opts) {
   let v3Doc;
   const doc = await SwaggerParser.bundle(spec);
-  const isOpenApiV3 = "openapi" in doc && doc.openapi.startsWith("3");
+  const isOpenApiV3 = 'openapi' in doc && doc.openapi.startsWith('3');
   if (isOpenApiV3) {
     v3Doc = doc as OpenAPIV3.Document;
   } else {
@@ -33,7 +33,7 @@ export async function generateSource(spec: string, opts: Opts) {
   }
   const ast = generateAst(v3Doc, opts);
   const { title, version } = v3Doc.info;
-  const preamble = ["$&", title, version].filter(Boolean).join("\n * ");
+  const preamble = ['$&', title, version].filter(Boolean).join('\n * ');
   const src = printAst(ast);
   return src.replace(/^\/\*\*/, preamble);
 }

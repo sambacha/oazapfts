@@ -1,4 +1,4 @@
-import _ from "lodash";
+ import _ from "lodash";
 import ts, { factory } from "typescript";
 import path from "path";
 import { OpenAPIV3 } from "openapi-types";
@@ -487,22 +487,7 @@ export default class ApiGenerator {
         (res) =>
           !!_.get(res, ["content", "application/json"]) ||
           !!_.get(res, ["content", "*/*"])
-      )
-    ) {
-      return "json";
-    }
-
-    // if there’s `text/*`, assume `text`
-    if (
-      resolvedResponses.some((res) =>
-        Object.keys(res.content ?? []).some((type) => type.startsWith("text/"))
-      )
-    ) {
-      return "text";
-    }
-
-    // for the rest, assume `blob`
-    return "blob";
+      );
   }
 
   getSchemaFromContent(content: any) {
@@ -511,18 +496,12 @@ export default class ApiGenerator {
     if (contentType) {
       schema = _.get(content, [contentType, "schema"]);
     }
-    if (schema) {
-      return schema;
-    }
-
-    // if no content is specified -> string
-    // `text/*` -> string
-    if (
-      Object.keys(content).length === 0 ||
-      Object.keys(content).some((type) => type.startsWith("text/"))
-    ) {
-      return { type: "string" };
-    }
+    return (
+      schema || {
+        type: "string",
+      }
+    );
+  }
 
   wrapResult(ex: ts.Expression) {
     return this.opts?.optimistic ? callZgresFunction("ok", [ex]) : ex;
